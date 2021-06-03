@@ -8,6 +8,17 @@ nslookup #obtain domain name or IP address mapping by querying the Domain Name S
          #-type=ns/a/aaaa/mx/cname
 wget #tool that allow to downloading contents from web servers.
 dig #for query the DNS for network tshooting
+    dig NS WEBSITE +short > to check nameservers
+    dig WEBSITE +trace > to see the delegation path
+    dig SOA WEBSITE @NAMESERVER > Look if a zone exists on a particular NS
+    dig WEBSITE @X.X.X.X > Check what a particular resolver has in its cache.
+    dig MX WEBSITE +short > to check the mail servers accepting emails
+    dig -x X.X.X.X > to perform a reverse DNS check
+    dig WEBSITE +nssearch > to check if your DNS zone is sync over all auth NS.
+    dig +dnssec WEBSITE @NAMESERVER > to check RRSIG
+    dig DNSKEY WEBSITE @NAMESERVER > to check ZSK key
+    dig +short SOA WEBSITE @NAMESERVER > to check the zone
+
 whois #tool for obtaining both domain and IP related information about a network.
 ping
 traceroute
