@@ -52,3 +52,19 @@ curl WEBSITE #GET request
     -H "HTTP-HEADER : VALUE" WEBSITE -v #generating additional information
     -I --http2 WEBSITE #check HTTP/2 support
     --request GET/POST/DELETE/PUT WEBSITE #curl examples to simulate HTTP methods
+
+#- NETWORK NAMESPACES -#
+ip netns add NSNAME #create a namespace
+ip netns exec NSNAME COMMAND #execute a command like ip addr, arp, route
+ip -n NSMANE COMMAND #its a shortcut of "netns exec"
+ip link add VETH_NSNAME type veth peer name VETH_NSNAME2 #to create a "pipe" between 2 namespaces
+ip link set VETH_NSNAME netns NSNAME #attach the virtual interface to the namespace NIC
+ip link add VIRTUAL_NET type bridge #create a virtual network/switch
+ip link set dev VIRTUAL_NET up/down #bring the virtual switch up or down
+ip link set VET_NSNAME master VIRTUAL_NET #attach the interface to the virtual network/switch
+ip -n NSNAME link del VET_NSNAME #
+ip -n NSNAME addr add X.X.X.X dev VETH_NSNAME #attach a IP addres to the virtual interface
+ip -n NSNAME link set VETH_NSNAME up/down #bring the virtual interface IP up or down
+ip netns exec NSNAME ping X.X.X.X 
+ip netns exec NSNAME arp
+iprables -t nat -A POSTROUTING -s X.X.X.X -j MASQUERADE #do the NAT to reach the outside network
