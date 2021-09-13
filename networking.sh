@@ -53,18 +53,84 @@ curl WEBSITE #GET request
     -I --http2 WEBSITE #check HTTP/2 support
     --request GET/POST/DELETE/PUT WEBSITE #curl examples to simulate HTTP methods
 
-#- NETWORK NAMESPACES -#
-ip netns add NSNAME #create a namespace
-ip netns exec NSNAME COMMAND #execute a command like ip addr, arp, route
-ip -n NSMANE COMMAND #its a shortcut of "netns exec"
-ip link add VETH_NSNAME type veth peer name VETH_NSNAME2 #to create a "pipe" between 2 namespaces
-ip link set VETH_NSNAME netns NSNAME #attach the virtual interface to the namespace NIC
-ip link add VIRTUAL_NET type bridge #create a virtual network/switch
-ip link set dev VIRTUAL_NET up/down #bring the virtual switch up or down
-ip link set VET_NSNAME master VIRTUAL_NET #attach the interface to the virtual network/switch
-ip -n NSNAME link del VET_NSNAME #
-ip -n NSNAME addr add X.X.X.X dev VETH_NSNAME #attach a IP addres to the virtual interface
-ip -n NSNAME link set VETH_NSNAME up/down #bring the virtual interface IP up or down
-ip netns exec NSNAME ping X.X.X.X 
-ip netns exec NSNAME arp
-iprables -t nat -A POSTROUTING -s X.X.X.X -j MASQUERADE #do the NAT to reach the outside network
+#- NETWORK NAMESPACES WITH BRCTL (LINUX BRIDGE)-#
+# add the namespaces. you find to entries in the directory /var/run/netns/
+ip netns add ns1
+ip netns add ns2
+# create the switch
+BRIDGE=br-test
+brctl addbr $BRIDGE
+brctl stp   $BRIDGE off
+ip link set dev $BRIDGE up
+#
+#### PORT 1
+# create a port pair
+ip link add tap1 type veth peer name br-tap1
+# attach one side to linuxbridge
+brctl addif br-test br-tap1 
+# attach the other side to namespace
+ip link set tap1 netns ns1
+# set the ports to up
+ip netns exec ns1 ip link set dev tap1 up
+ip link set dev br-tap1 up
+#
+#### PORT 2
+# create a port pair
+ip link add tap2 type veth peer name br-tap2
+# attach one side to linuxbridge
+brctl addif br-test br-tap2
+# attach the other side to namespace
+ip link set tap2 netns ns2
+# set the ports to up
+ip netns exec ns2 ip link set dev tap2 up
+ip link set dev br-tap2 up
+
+#- NETWORK NAMESPACES WITH OPEN VSWITCH-#
+# add the namespaces. you find to entries in the directory /var/run/netns/
+ip netns add ns1-red
+ip netns add ns2-green
+# create the switch
+ovs-vsctl add-br OVS1
+# check namespaces
+ip netns
+# launch commands in the dhcp-r namespace
+ip netns exec dhcp-r bash
+#
+#### PORT 1
+# create a port pair
+ip link add eth0-r type veth peer name veth-r
+# attach one side to ovs
+ovs-vsctl add-port OVS1 veth0-r 
+# attach the other side to namespace
+ip link set eth0-r netns ns1-red
+# set the ports to up
+ip netns exec ns1-red ip link set dev eth0-r up
+ip netns exec ns1-red ip link set dev lo up
+ip link set dev veth-r up
+# assign an IP address to ns1-red interface
+ip netns exec ns1-red ip address add 10.0.0.1/24 dev eth0-r
+
+#- CREATE DNS SERVER AND CLIENT -#
+# delete old ip addresses from ns to prepare the DHCP clients
+ip netns exec ns1-red ip address del 10.0.0.1/24 dev eth0-r
+# create a ns for DHCP service
+ip netns add dhcp-r
+# create a new port for the DHCP connection
+ovs-vsctl add-port OVS1 tap-r
+# makes port internal
+ovs-vsctl set interface tap-r type=internal
+# set a vlan 100 to the ns1-red interface and to the dhcp-r interface
+ovs-vsctl set port tap1 tag=100
+ovs-vsctl set port eth0-r tag=100
+# set the port tap-r to DHCP ns
+ip link set tap-r netns dhcp-r
+# set the LO interface up
+ip netns exec dhcp-r ip link set dev lo up
+# set the link tap-r up
+ip netns exec dhcp-r ip link set dev tap-r up
+# set IP address to DHCP link
+ip netns exec dhcp-r ip address add 10.50.50.2/24 dev tap-r
+# set up the DHCP service with the IP ranges
+ip netns exec dhcp-r dnsmasq --interface=tap-r --dhcp-range=10.50.50.10,10.50.50.100,255.255.255.0
+# now set up the ns1-red port as DHCP client
+ip netns exec ns1-red dhclient eth0-r
