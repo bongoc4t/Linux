@@ -134,3 +134,42 @@ ip netns exec dhcp-r ip address add 10.50.50.2/24 dev tap-r
 ip netns exec dhcp-r dnsmasq --interface=tap-r --dhcp-range=10.50.50.10,10.50.50.100,255.255.255.0
 # now set up the ns1-red port as DHCP client
 ip netns exec ns1-red dhclient eth0-r
+
+#-- OPEN VSWITH CHEAT SHEET--#
+ovs-vsctl : Used for configuring the ovs-vswitchd configuration database (known as ovs-db)
+ovs-ofctl : A command line tool for monitoring and administering OpenFlow switches
+ovs-dpctl : Used to administer Open vSwitch datapaths
+ovs−appctl : Used for querying and controlling Open vSwitch daemons
+
+# INSTALL OPEN VSWITCH
+sudo apt install openvswitch-switch
+
+# START OVS DAEMON
+sudo ovs-vswitchd
+
+# Prints the current version of openvswitch. 
+ovs-vsctl –V 
+
+# Prints a brief overview of the switch database configuration.
+ovs-vsctl show 
+
+# Prints a list of configured bridges 
+ovs-vsctl list-br 
+
+# Prints a list of ports on a specific bridge. 
+ovs-vsctl list-ports <bridge>
+
+# Prints a list of interfaces.
+ovs-vsctl list interface
+
+# Creates a bridge in the switch database.
+ovs-vsctl add-br <bridge>
+
+# Binds an interface (physical or virtual) to a bridge. 
+ovs-vsctl add-port <bridge> <interface> 
+
+# Converts port to an access port on specified VLAN (by default all OVS ports are VLAN trunks). 
+ovs-vsctl add-port <bridge> <interface> tag=<VLAN number> 
+
+# Used to create patch ports to connect two or more bridges together.
+ovs-vsctl set interface <interface> type=patch options:peer=<interface>

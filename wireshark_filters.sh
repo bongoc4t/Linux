@@ -9,9 +9,26 @@ dns.flags.rcode == 0 #Number of Successful queries
 
 
 #https://www.iana.org/assignments/dns-parameters/dns-parameters.xml#dns-parameters-6
-dns.resp.type == X 
+dns.qry.type == X 
     251 = IXFR
-    S52 = AXFR
+    252 = AXFR
     6 = SOA
     5 = CNAME
 
+# DNS OpCodes
+dns.flags.opcode == X
+    4 = Notify
+    5 = update
+
+# Sets a filter for any packet with 10.0.0.1, as either the source or dest
+ip.addr == 18.209.182.68
+
+# sets a conversation filter between the two defined IP addresses
+ip.addr==10.0.0.1  && ip.addr==10.0.0.2 
+
+# sets a filter for any TCP packet with 4000 as a source or dest port  
+tcp.port==4000 
+
+ip.addr == 18.209.182.68 && tcp.port==53
+ip.addr == 3.93.134.165 && tcp.port==53
+ip.addr == 	3.94.223.31 && tcp.port==53
