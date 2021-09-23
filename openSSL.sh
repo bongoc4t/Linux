@@ -1,3 +1,12 @@
+#generate keys
+openssl genrsa -out ca.key 2048
+
+#certificate signing request
+openssl req -new -key ca.key -subj "/CN=KUBERNETES-CA" -out ca.csr
+
+#sign certificates
+openssl x509 -req -in ca.csr -signkey ca.key -out ca.crt
+
 #Check an SSL connection. All the certificates (including Intermediates) should be displayed
 openssl s_client -connect WEBSITE:443
 
@@ -40,3 +49,8 @@ openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout privateKey.key
 
 #Generate a self-signed certificate
 openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout privateKey.key -out certificate.crt
+
+#That command connects to the desired website and pipes the certificate in PEM format on to another openssl command that reads and parses 
+#the details.
+#(Note that "redundant" -servername parameter is necessary to make openssl do a request with SNI support.)
+echo | openssl s_client -showcerts -servername aks-workpermit-eastus2-np.shwaks.com -connect aks-workpermit-eastus2-np.shwaks.com:443 2>/dev/null | openssl x509 -inform pem -noout -text

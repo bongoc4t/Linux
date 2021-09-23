@@ -1,4 +1,13 @@
 #-NETWORKING COMMANDS-#
+#ip addr del just removes the one IP address from the interface, i.e. tells the system to not communicate using that address. 
+#You could still have another address in use on the interface, either an IPv4 or an IPv6 one (or multiple). As far as the physical 
+#Ethernet link is concerned, thats no difference whatsoever, it only affects the network layer.
+
+#ip link set <iface> down on the other hand would shut down the whole interface on the physical layer, which would usually make it 
+#appear to the connected device as if the cable was unplugged. You could still have the IP address configured, and the system could 
+#still use it to communicate internally, or accept packets addressed to that IP address coming from other interfaces. 
+#(Unless you have settings to stop that.)
+
 /etc/sysconfig/network-scripts #is the location where all config files are located
 ifconfig #this command is use to initialize an interface, assign IP Address to interface and enable or disable interface on demand. 
 iwconfig #same that ifconfig but with wireless
@@ -43,15 +52,6 @@ nmcli dev connect "device" #turn on the network device
 systemctl start NetworkManager
 systemctl enable NetworkManager
 systemctl restart network
-
-#---> CURL
-curl WEBSITE #GET request
-    -I WEBSITE #returning only the HTTP headers of a URL
-    -o FILE_NAME WEBSITE #saving the result of a curl command
-    -H "HTTP-HEADER : VALUE" WEBSITE #adding an additional HTTP request header
-    -H "HTTP-HEADER : VALUE" WEBSITE -v #generating additional information
-    -I --http2 WEBSITE #check HTTP/2 support
-    --request GET/POST/DELETE/PUT WEBSITE #curl examples to simulate HTTP methods
 
 #- NETWORK NAMESPACES WITH BRCTL (LINUX BRIDGE)-#
 # add the namespaces. you find to entries in the directory /var/run/netns/
