@@ -60,3 +60,7 @@ openssl s_client -showcerts -connect URL:443
 #(Note that "redundant" -servername parameter is necessary to make openssl do a request with SNI support.)
 #This is a continuation of the last command in case the server is with SNI
 echo | openssl s_client -showcerts -servername aks-workpermit-eastus2-np.shwaks.com -connect aks-workpermit-eastus2-np.shwaks.com:443 2>/dev/null | openssl x509 -inform pem -noout -text
+
+#with -connect you can use an IP address instead of a hostname, if the hostname resolves to Volterra’s edge.
+#Then, with X.X.X.X being the address of the origin server, you can use:
+echo "" | openssl s_client -showcerts -servername aks-workpermit-eastus2-np.shwaks.com -connect X.X.X.X:443 | less to see the raw certificate
