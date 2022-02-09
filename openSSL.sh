@@ -50,7 +50,13 @@ openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout privateKey.key
 #Generate a self-signed certificate
 openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout privateKey.key -out certificate.crt
 
-#That command connects to the desired website and pipes the certificate in PEM format on to another openssl command that reads and parses 
-#the details.
+#Get SSL server certificate from Remote Server
+#We can get an interactive SSL connection to our server, using the openssl s_client command:
+#This keeps the interactive session open until we type Q (quit) and press , or until EOF is encountered.
+#We can use the -showcerts option to get the complete certificate chain:
+openssl s_client -showcerts -connect URL:443
+
+#That command connects to the desired website and pipes the certificate in PEM format on to another openssl command that reads and parses the details.
 #(Note that "redundant" -servername parameter is necessary to make openssl do a request with SNI support.)
+#This is a continuation of the last command in case the server is with SNI
 echo | openssl s_client -showcerts -servername aks-workpermit-eastus2-np.shwaks.com -connect aks-workpermit-eastus2-np.shwaks.com:443 2>/dev/null | openssl x509 -inform pem -noout -text
