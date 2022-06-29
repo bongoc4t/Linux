@@ -64,3 +64,10 @@ echo | openssl s_client -showcerts -servername aks-workpermit-eastus2-np.shwaks.
 #with -connect you can use an IP address instead of a hostname, if the hostname resolves to Volterra’s edge.
 #Then, with X.X.X.X being the address of the origin server, you can use:
 echo "" | openssl s_client -showcerts -servername aks-workpermit-eastus2-np.shwaks.com -connect X.X.X.X:443 | less to see the raw certificate
+
+#how to check the SAN for a ssl/tls certificate
+openssl s_client -connect website.com:443 </dev/null 2>/dev/null | openssl x509 -noout -text | grep DNS:
+
+#hot to get the SAN directly from a file?
+openssl x509 -noout -text -in MyCertificate.crt | grep DNS:
+

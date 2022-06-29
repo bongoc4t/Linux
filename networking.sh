@@ -8,6 +8,10 @@
 #still use it to communicate internally, or accept packets addressed to that IP address coming from other interfaces. 
 #(Unless you have settings to stop that.)
 
+#DIRECTORIES
+/etc/hosts #location of the local DNS file
+/etc/nsswitch.conf #here you can change the order of the DNS (check first host file then Nameservers)
+
 /etc/sysconfig/network-scripts #is the location where all config files are located
 ifconfig #this command is use to initialize an interface, assign IP Address to interface and enable or disable interface on demand. 
 iwconfig #same that ifconfig but with wireless
