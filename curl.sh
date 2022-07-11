@@ -13,5 +13,3 @@ curl WEBSITE #GET request
 #Displaying a remote SSL certificate details 
 curl --insecure -vvI https://www.google.com 2>&1 | awk 'BEGIN { cert=0 } /^\* SSL connection/ { cert=1 } /^\*/ { if (cert) print }'
 curl -vvI https://www.google.com
-
-another line
